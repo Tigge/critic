@@ -104,7 +104,7 @@ class ApprovalColumn:
 
         profiler.check("fillCache: total")
 
-        cursor.execute("""SELECT child, COALESCE(reviewfilechanges.to, reviewfiles.state) AS effective_state, COUNT(*), SUM(deleted), SUM(inserted)
+        cursor.execute("""SELECT child, COALESCE(reviewfilechanges.to_state, reviewfiles.state) AS effective_state, COUNT(*), SUM(deleted), SUM(inserted)
                             FROM changesets
                             JOIN reviewfiles ON (changeset=changesets.id)
                             JOIN reviewuserfiles ON (reviewuserfiles.file=reviewfiles.id)

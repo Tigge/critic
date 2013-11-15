@@ -545,7 +545,7 @@ def sendReviewBatch(db, from_user, to_user, recipients, review, batch_id, was_ac
                         FROM reviewfiles
                         JOIN reviewfilechanges ON (reviewfilechanges.file=reviewfiles.id)
                        WHERE reviewfilechanges.batch=%s
-                         AND reviewfilechanges.to='reviewed'
+                         AND reviewfilechanges.to_state='reviewed'
                     GROUP BY reviewfiles.file""",
                        (batch_id,))
     reviewed_files_lines = cursor.fetchall()
@@ -557,7 +557,7 @@ def sendReviewBatch(db, from_user, to_user, recipients, review, batch_id, was_ac
                         JOIN reviewfilechanges ON (reviewfilechanges.file=reviewfiles.id)
                         JOIN changesets ON (changesets.id=reviewfiles.changeset)
                        WHERE reviewfilechanges.batch=%s
-                         AND reviewfilechanges.to='reviewed'""",
+                         AND reviewfilechanges.to_state='reviewed'""",
                        (batch_id,))
     reviewed_commits = cursor.fetchall()
 
@@ -567,7 +567,7 @@ def sendReviewBatch(db, from_user, to_user, recipients, review, batch_id, was_ac
                         FROM reviewfiles
                         JOIN reviewfilechanges ON (reviewfilechanges.file=reviewfiles.id)
                        WHERE reviewfilechanges.batch=%s
-                         AND reviewfilechanges.to='pending'
+                         AND reviewfilechanges.to_state='pending'
                     GROUP BY reviewfiles.file""",
                    (batch_id,))
     unreviewed_files_lines = cursor.fetchall()
@@ -579,7 +579,7 @@ def sendReviewBatch(db, from_user, to_user, recipients, review, batch_id, was_ac
                         JOIN reviewfilechanges ON (reviewfilechanges.file=reviewfiles.id)
                         JOIN changesets ON (changesets.id=reviewfiles.changeset)
                        WHERE reviewfilechanges.batch=%s
-                         AND reviewfilechanges.to='pending'""",
+                         AND reviewfilechanges.to_state='pending'""",
                        (batch_id,))
     unreviewed_commits = cursor.fetchall()
 
