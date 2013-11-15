@@ -289,7 +289,7 @@ CREATE INDEX reviews_branch ON reviews (branch);
 ALTER TABLE branches ADD CONSTRAINT branches_review_fkey FOREIGN KEY (review) REFERENCES reviews ON DELETE SET NULL;
 
 CREATE TABLE reviewfilters
-  ( id SERIAL NOT NULL PRIMARY KEY,
+  ( id SERIAL PRIMARY KEY,
 
     review INTEGER NOT NULL REFERENCES reviews ON DELETE CASCADE,
     uid INTEGER NOT NULL REFERENCES users ON DELETE CASCADE,
@@ -329,7 +329,7 @@ CREATE TABLE reviewchangesets
     PRIMARY KEY (review, changeset) );
 
 CREATE TABLE reviewrebases
-  ( id SERIAL NOT NULL PRIMARY KEY,
+  ( id SERIAL PRIMARY KEY,
     review INTEGER NOT NULL REFERENCES reviews ON DELETE CASCADE,
     old_head INTEGER NOT NULL REFERENCES commits,
     new_head INTEGER REFERENCES commits,
