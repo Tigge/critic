@@ -53,8 +53,9 @@ with frontend.signin():
     frontend.operation("addrepository",
                        data={ "name": "critic",
                               "path": "critic",
-                              "remote": { "url": repository.url,
-                                          "branch": "master" }})
+                              "mirror": { "remote_url": repository.url,
+                                          "remote_branch": "master",
+                                          "local_branch": "master" }})
 
     # If it hasn't happened after 30 seconds, something must be wrong.
     deadline = time.time() + 30
