@@ -89,6 +89,7 @@ class Instance(testing.Instance):
         self.strict_fs_permissions = getattr(arguments, "strict_fs_permissions", False)
         self.coverage = getattr(arguments, "coverage", False)
         self.mailbox = None
+        self.etc_dir = "/etc/critic"
         self.__started = False
         self.__installed = False
 
@@ -352,6 +353,12 @@ class Instance(testing.Instance):
             return subprocess.check_output(argv, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as error:
             raise GuestCommandError(" ".join(argv), error.output)
+
+    def criticctl(self, argv):
+        try:
+            return self.execute(["sudo", "criticctl"] + argv)
+        except GuestCommandError as error:
+            raise testing.CriticctlError(error.command, error.stdout, error.stderr)
 
     def adduser(self, name, email=None, fullname=None, password=None):
         if email is None:

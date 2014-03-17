@@ -66,11 +66,18 @@ class Frontend(object):
         self.http_port = http_port
         self.session_id = None
 
+    def prefix(self, username=None):
+        if username:
+            username += "@"
+        else:
+            username = ""
+        return "http://%s%s:%d" % (username, self.hostname, self.http_port)
+
     def page(self, url, params={}, expect={},
              expected_content_type="text/html",
              expected_http_status=200,
              disable_redirects=False):
-        full_url = "http://%s:%d/%s" % (self.hostname, self.http_port, url)
+        full_url = "%s/%s" % (self.prefix(), url)
 
         testing.logger.debug("Fetching page: %s ..." % full_url)
 
@@ -128,8 +135,11 @@ class Frontend(object):
 
         content_type, _, _ = response.headers["content-type"].partition(";")
 
+        if isinstance(expected_content_type, str):
+            expected_content_type = (expected_content_type,)
+
         if response.status_code == 200:
-            if content_type != expected_content_type:
+            if content_type not in expected_content_type:
                 testing.logger.error(
                     "Page '%s': wrong content type: %s" % (url, content_type))
                 raise testing.TestFailure
@@ -168,7 +178,7 @@ class Frontend(object):
         return document
 
     def operation(self, url, data, expect={}):
-        full_url = "http://%s:%d/%s" % (self.hostname, self.http_port, url)
+        full_url = "%s/%s" % (self.prefix(), url)
 
         testing.logger.debug("Executing operation: %s ..." % full_url)
 

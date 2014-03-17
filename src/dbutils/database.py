@@ -74,7 +74,7 @@ class Database(Session):
             else:
                 return self.__rows
 
-        def execute(self, query, params=None):
+        def execute(self, query, params=()):
             if not self.__profiling:
                 self.__cursor.execute(query, params)
             else:
@@ -89,7 +89,7 @@ class Database(Session):
                 after = time.time()
                 self.__db.recordProfiling(query, after - before, rows=len(self.__rows) if self.__rows else 0)
 
-        def executemany(self, query, params):
+        def executemany(self, query, params=()):
             if self.__profiling is None:
                 self.__cursor.executemany(query, params)
             else:

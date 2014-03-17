@@ -15,6 +15,7 @@
 # the License.
 
 import os
+import subprocess
 
 class Error(Exception):
     pass
@@ -27,16 +28,45 @@ class TestFailure(Error):
     """Error raised for "expected" test failures."""
     pass
 
+class CommandError(Exception):
+    def __init__(self, stdout, stderr):
+        self.stdout = stdout
+        self.stderr = stderr
+
+class CriticctlError(TestFailure):
+    """Error raised for failed criticctl usage."""
+    def __init__(self, command, stdout, stderr=None):
+        super(CriticctlError, self).__init__(
+            "CriticctlError: %s\nOutput:\n%s" % (command, stderr or stdout))
+        self.command = command
+        self.stdout = stdout
+        self.stderr = stderr
+
 class NotSupported(Error):
-    """Error raised when a test (and its dependencies) are unsupported."""
+    """Error raised when a test is unsupported."""
     pass
 
 class Instance(object):
+    flags_on = []
+    flags_off = []
+
     def __enter__(self):
         return self
 
     def __exit__(self, *args):
         return False
+
+    def executeProcess(self, args, log_stdout=True, log_stderr=True, **kwargs):
+        process = subprocess.Popen(
+            args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, **kwargs)
+        stdout, stderr = process.communicate()
+        if stdout.strip() and log_stdout:
+            logger.log(STDOUT, stdout.rstrip("\n"))
+        if stderr.strip() and log_stderr:
+            logger.log(STDERR, stderr.rstrip("\n"))
+        if process.returncode != 0:
+            raise CommandError(stdout, stderr)
+        return stdout
 
     def translateUnittestPath(self, module):
         path = module.split(".")
@@ -58,6 +88,7 @@ import repository
 import mailbox
 import findtests
 import utils
+import quickstart
 
 logger = None
 
@@ -76,7 +107,7 @@ def configureLogging(arguments=None, wrap=None):
         STDERR = logging.DEBUG + 2
         logging.addLevelName(STDOUT, "STDOUT")
         logging.addLevelName(STDERR, "STDERR")
-        if arguments and arguments.coverage:
+        if arguments and getattr(arguments, "coverage", False):
             STREAM = sys.stderr
         else:
             STREAM = sys.stdout

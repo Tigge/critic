@@ -245,6 +245,10 @@ def clean_root_pyc_files():
 
 @contextlib.contextmanager
 def as_critic_system_user():
+    if installation.is_quick_start:
+        yield
+        return
+
     saved_cwd = os.getcwd()
     os.chdir(tempfile.gettempdir())
     os.setegid(installation.system.gid)

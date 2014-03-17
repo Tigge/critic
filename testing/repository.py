@@ -19,6 +19,7 @@ import time
 import tempfile
 import shutil
 import subprocess
+import re
 
 import testing
 
@@ -44,9 +45,10 @@ def _git(args, **kwargs):
         raise GitCommandError(" ".join(argv), error.output)
 
 class Repository(object):
-    def __init__(self, host, port, tested_commit, vm_hostname):
+    def __init__(self, host, port, tested_commit, instance):
         self.host = host
         self.port = port
+        self.instance = instance
         self.base_path = tempfile.mkdtemp()
         self.path = os.path.join(self.base_path, "critic.git")
         self.work = os.path.join(self.base_path, "work")
@@ -149,22 +151,39 @@ class Repository(object):
             testing.logger.debug("Exported repository: %s" % self.v8_path)
         return True
 
-    def run(self, args):
-        return _git(args, cwd=self.path)
+    def run(self, args, cwd=None, env=None):
+        if cwd is None:
+            cwd = self.path
+        if isinstance(self.instance, testing.quickstart.Instance):
+            if args[0] in ("push", "fetch", "ls-remote"):
+                for index, arg in enumerate(args[1:]):
+                    match = re.match("(?:([^@]+)@)([^:]+):/var/git/(.*)$", arg)
+                    if match and match.group(2) == self.instance.hostname:
+                        if match.group(1):
+                            if env is None:
+                                env = {}
+                            env["REMOTE_USER"] = match.group(1)
+                        args[index + 1] = os.path.join(self.instance.state_dir, "git", match.group(3))
+        return _git(args, cwd=cwd, env=env)
 
     def workcopy(self, name="critic", empty=False):
+        master = self
+
         class Workcopy(testing.Context):
             def __init__(self, path, start, finish):
                 super(Workcopy, self).__init__(start, finish)
                 self.path = path
 
             def run(self, args, **kwargs):
-                env = os.environ.copy()
-                for name in kwargs.keys():
-                    if name.lower() != name == name.upper():
-                        env[name] = kwargs[name]
-                        del kwargs[name]
-                return _git(args, cwd=self.path, env=env, **kwargs)
+                if kwargs:
+                    env = {}
+                    for name in kwargs.keys():
+                        if name.lower() != name == name.upper():
+                            env[name] = kwargs[name]
+                            del kwargs[name]
+                else:
+                    env = None
+                return master.run(args, cwd=self.path, env=env, **kwargs)
 
         path = os.path.join(self.work, name)
 

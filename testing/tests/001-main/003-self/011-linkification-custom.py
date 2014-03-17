@@ -1,3 +1,6 @@
+# Need a VM (full installation) to do customizations.
+# @flag full
+
 import os
 
 TESTNAME = "010-linkification-custom"

@@ -23,8 +23,7 @@ with frontend.signin("alice"):
                               "value": True }] })
 
     with repository.workcopy(empty=True) as work:
-        work.run(["remote", "add", "critic",
-                  "alice@%s:/var/git/critic.git" % instance.hostname])
+        REMOTE_URL = "alice@%s:/var/git/critic.git" % instance.hostname
 
         def commit(fixup_message=None):
             if fixup_message:
@@ -43,7 +42,7 @@ with frontend.signin("alice"):
             return sha1
 
         def push():
-            work.run(["push", "-q", "critic",
+            work.run(["push", "-q", REMOTE_URL,
                       "HEAD:refs/heads/r/008-root-commit-pending"])
 
         with open(os.path.join(work.path, FILENAME), "w") as text_file:

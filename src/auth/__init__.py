@@ -16,10 +16,7 @@
 
 import os
 import base64
-import hashlib
 import re
-
-from passlib.context import CryptContext
 
 import configuration
 import dbutils
@@ -27,6 +24,24 @@ import dbutils
 class CheckFailed(Exception): pass
 class NoSuchUser(CheckFailed): pass
 class WrongPassword(CheckFailed): pass
+
+try:
+    from passlib.context import CryptContext
+except ImportError:
+    import hashlib
+
+    if not configuration.debug.IS_QUICKSTART:
+        raise
+
+    # Support quick-starting without 'passlib' installed by falling back to
+    # completely bogus unsalted SHA-256-based hashing.
+    class CryptContext:
+        def __init__(self, **kwargs):
+            pass
+        def encrypt(self, password):
+            return hashlib.sha256(password).hexdigest()
+        def verify_and_update(self, password, hashed):
+            return self.encrypt(password) == hashed, None
 
 def createCryptContext():
     kwargs = {}

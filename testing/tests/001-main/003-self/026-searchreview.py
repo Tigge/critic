@@ -1,3 +1,6 @@
+# The /searchreview operation depends on PostgreSQL:isms.
+# @flag postgresql
+
 import re
 
 REVIEWS = { "giraffe": { "sha1": "5360e5d734e3b990c0dc67496c7a83f94013d01d",
@@ -45,9 +48,6 @@ def about(subject):
     return testing.mailbox.WithSubject(subject)
 
 with repository.workcopy() as work:
-    work.run(["remote", "add", "critic",
-              "nobody@%s:/var/git/critic.git" % instance.hostname])
-
     for review in REVIEWS.values():
         primary_owner = review["owners"][0]
 
@@ -57,13 +57,11 @@ with repository.workcopy() as work:
                 data={ "settings": [{ "item": "review.createViaPush",
                                       "value": True }] })
 
-            work.run(
-                ["remote", "set-url", "critic",
-                 ("%s@%s:/var/git/critic.git"
-                  % (primary_owner, instance.hostname))])
+            REMOTE_URL = ("%s@%s:/var/git/critic.git"
+                          % (primary_owner, instance.hostname))
 
             output = work.run(
-                ["push", "critic", "%(sha1)s:refs/heads/%(branch)s" % review])
+                ["push", REMOTE_URL, "%(sha1)s:refs/heads/%(branch)s" % review])
 
             next_is_review_url = False
 

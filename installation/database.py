@@ -94,6 +94,10 @@ backup of the database first is strongly recommended.
 
             subprocess.check_call(["bzip2", backup_path])
 
+    data["installation.database.driver"] = "postgresql"
+    data["installation.database.parameters"] = { "database": "critic",
+                                                 "user": data["installation.system.username"] }
+
     return True
 
 def install(data):

@@ -3,13 +3,15 @@ import time
 BRANCH_NAME = "025-trackedbranch"
 
 with repository.workcopy() as work, frontend.signin():
+    REMOTE_URL = "alice@%s:/var/git/critic.git" % instance.hostname
+
     def wait_for_branch(branch_name, value):
         # If it hasn't happened after 10 seconds, something must be wrong.
         deadline = time.time() + 10
 
         while time.time() < deadline:
             try:
-                output = work.run(["ls-remote", "--exit-code", "critic",
+                output = work.run(["ls-remote", "--exit-code", REMOTE_URL,
                                    "refs/heads/" + branch_name])
                 if output.startswith(value):
                     break
@@ -38,9 +40,6 @@ with repository.workcopy() as work, frontend.signin():
         testing.expect.check(to_sha1, branch_log_item["to_sha1"])
         testing.expect.check(hook_output, branch_log_item["hook_output"])
         testing.expect.check(successful, branch_log_item["successful"])
-
-    work.run(["remote", "add", "critic",
-              "alice@%s:/var/git/critic.git" % instance.hostname])
 
     work.run(["push", "origin", "HEAD:refs/heads/" + BRANCH_NAME])
 
