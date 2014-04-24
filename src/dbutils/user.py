@@ -96,7 +96,7 @@ class User(object):
 
             rows = sorted(cursor, key=lambda row: row[0], reverse=True)
 
-            for _, item, preference_type, integer, string in cursor:
+            for _, item, preference_type, integer, string in rows:
                 cache_key = _preferenceCacheKey(item, None, None)
                 if cache_key not in self.preferences:
                     if preference_type == "boolean":
