@@ -27,9 +27,9 @@ import json
 import signal
 import time
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
+sys.path.insert(0, os.path.dirname(__file__))
 
-parser = argparse.ArgumentParser("python installation/quickstart.py",
+parser = argparse.ArgumentParser("python quickstart.py",
                                  description="Critic instance quick-start utility script.")
 parser.add_argument("--quiet", action="store_true",
                     help="Suppress most output")
@@ -395,8 +395,8 @@ finally:
         # Failure happened before stopTheSystem() was declared.
         pass
 
-    if not arguments.quiet and not arguments.testing:
-        print "Cleaing up ..."
-
     if not arguments.state_dir:
+        if not arguments.quiet and not arguments.testing:
+            print "Cleaing up ..."
+
         shutil.rmtree(state_dir)
