@@ -108,7 +108,7 @@ class Instance(testing.Instance):
 
     def install(self, repository, override_arguments={}, other_cwd=False,
                 quick=False, interactive=False):
-        argv = [sys.executable, "-u", "installation/quickstart.py",
+        argv = [sys.executable, "-u", "quickstart.py",
                 "--testing",
                 "--admin-username", "admin",
                 "--admin-fullname", "Testing Administrator",
