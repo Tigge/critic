@@ -24,6 +24,8 @@ except ImportError:
 else:
     if configuration.database.DRIVER == "postgresql":
         import psycopg2 as driver
+
+        TransactionRollbackError = driver.extensions.TransactionRollbackError
     else:
         import sys
         import os
@@ -32,9 +34,12 @@ else:
 
         import installation.qs.sqlite as driver
 
+        # SQLite doesn't appear to be throwing this type of error.
+        class TransactionRollbackError(Exception):
+            pass
+
     IntegrityError = driver.IntegrityError
     ProgrammingError = driver.ProgrammingError
-    TransactionRollbackError = driver.TransactionRollbackError
 
     def connect():
         return driver.connect(**configuration.database.PARAMETERS)

@@ -8,10 +8,6 @@ import installation
 IntegrityError = sqlite3.IntegrityError
 ProgrammingError = sqlite3.ProgrammingError
 
-# SQLite doesn't appear to be throwing this type of error.
-class TransactionRollbackError(Exception):
-    pass
-
 def convert_date(value):
     try:
         return datetime.datetime.fromtimestamp(int(value))
