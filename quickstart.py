@@ -299,7 +299,7 @@ try:
 
     def getNewestModificationTime():
         newest = 0
-        for dirpath, dirnames, filenames in os.walk("src"):
+        for dirpath, dirnames, filenames in os.walk("."):
             for filename in filenames:
                 if filename[0] != "." and filename.endswith(".py"):
                     path = os.path.join(dirpath, filename)
