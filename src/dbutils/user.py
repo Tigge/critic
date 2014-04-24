@@ -86,16 +86,17 @@ class User(object):
     def loadPreferences(self, db):
         if not self.preferences:
             cursor = db.cursor()
-            cursor.execute("""SELECT item, type, integer, string
+            cursor.execute("""SELECT uid, item, type, integer, string
                                 FROM preferences
                                 JOIN userpreferences USING (item)
                                WHERE (uid=%s OR uid IS NULL)
                                  AND repository IS NULL
-                                 AND filter IS NULL
-                            ORDER BY uid NULLS LAST""",
+                                 AND filter IS NULL""",
                            (self.id,))
 
-            for item, preference_type, integer, string in cursor:
+            rows = sorted(cursor, key=lambda row: row[0], reverse=True)
+
+            for _, item, preference_type, integer, string in cursor:
                 cache_key = _preferenceCacheKey(item, None, None)
                 if cache_key not in self.preferences:
                     if preference_type == "boolean":
