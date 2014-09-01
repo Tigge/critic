@@ -45,6 +45,8 @@ def generateEmpty(target):
 def generateHeader(target, db, user, generate_right=None, current_page=None, extra_links=[], profiler=None):
     target.addExternalStylesheet("resource/third-party/jquery-ui.css")
     target.addExternalStylesheet("resource/third-party/chosen.css")
+    target.addExternalStylesheet("resource/third-party/bootstrap.css")
+    target.addExternalStylesheet("resource/third-party/bootstrap-theme.css")
     target.addExternalStylesheet("resource/overrides.css")
     target.addExternalStylesheet("resource/basic.css")
     target.addInternalStylesheet(".defaultfont, body { %s }" % user.getPreference(db, "style.defaultFont"))
@@ -53,6 +55,7 @@ def generateHeader(target, db, user, generate_right=None, current_page=None, ext
     target.addExternalScript("resource/third-party/jquery-ui.js")
     target.addExternalScript("resource/third-party/jquery-ui-autocomplete-html.js")
     target.addExternalScript("resource/third-party/chosen.js")
+    target.addExternalScript("resource/third-party/bootstrap.js")
     target.addExternalScript("resource/basic.js")
 
     target.noscript().h1("noscript").blink().text("Please enable scripting support!")
@@ -272,6 +275,43 @@ def displayMessage(db, req, user, title, review=None, message=None, page_title=N
         target.h1("center").text(title)
 
     return document
+
+
+class BootstrapDropdown():
+    def __init__(self, target, text):
+        target.setAttribute("class", "dropdown")
+        target.a("dropdown-toggle", data_toggle="dropdown").text(text + " ").span("caret")
+        self.dropdown = target.ul("dropdown-menu", role="menu")
+
+    def add_item(self, href, text):
+        self.dropdown.li().a(href=href).text(text)
+
+    def add_separator(self):
+        self.dropdown.li("divider")
+
+
+class BootstrapNavbar:
+
+    class Position:
+        LEFT = 0
+        RIGHT = 1
+
+    def __init__(self, target, title, title_class=""):
+        self.navbar = target.nav("navbar navbar-default", role="navigation").div("container-fluid")
+
+        self.header = self.navbar.div("navbar-header")
+        self.header.a("navbar-brand " + title_class, href="#").text(title)
+
+        self.left = self.navbar.ul("nav navbar-nav navbar-left")
+        self.right = self.navbar.ul("nav navbar-nav navbar-right")
+
+    def add_item(self, href, text, position=Position.LEFT):
+        target = self.left if position == BootstrapNavbar.Position.LEFT else self.right
+        target.li().a(href=href).text(text)
+
+    def add_dropdown(self, text):
+        return BootstrapDropdown(self.right.li(), text)
+
 
 class PaleYellowTable:
     def __init__(self, target, title, columns=[10, 60, 30]):
