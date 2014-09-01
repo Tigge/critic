@@ -60,51 +60,24 @@ def generateHeader(target, db, user, generate_right=None, current_page=None, ext
 
     target.noscript().h1("noscript").blink().text("Please enable scripting support!")
 
-    row = target.table("pageheader", width='100%').tr()
-    left = row.td("left", valign='bottom', align='left')
-    b = left.b()
-
     opera_class = "opera"
-
     if configuration.debug.IS_DEVELOPMENT:
         opera_class += " development"
+    navigation_bar = BootstrapNavbar(target.div("navigation"), "Critic", opera_class)
 
-    b.b(opera_class, onclick="location.href='/';").text("Opera")
-    b.b("critic", onclick="location.href='/';").text("Critic")
-
-    links = []
-
-    if not user.isAnonymous():
-        links.append(["home", "Home", None, None])
-
-    links.append(["dashboard", "Dashboard", None, None])
-    links.append(["branches", "Branches", None, None])
-    links.append(["search", "Search", None, None])
+    # Links
+    navigation_bar.add_item("dashboard", "Dashboard")
+    navigation_bar.add_item("branches", "Branches")
+    navigation_bar.add_item("search", "Search")
 
     if user.hasRole(db, "administrator"):
-        links.append(["services", "Services", None, None])
+        navigation_bar.add_item("services", "Services")
     if user.hasRole(db, "repositories"):
-        links.append(["repositories", "Repositories", None, None])
+        navigation_bar.add_item("repositories", "Repositories")
+    navigation_bar.add_item("tutorial", "Tutorial")
 
     if profiler:
         profiler.check("generateHeader (basic)")
-
-    if configuration.extensions.ENABLED:
-        from extensions.extension import Extension
-
-        updated = Extension.getUpdatedExtensions(db, user)
-
-        if updated:
-            link_title = "\n".join([("%s by %s can be updated!" % (extension_name, author_fullname)) for author_fullname, extension_name in updated])
-            links.append(["manageextensions", "Extensions (%d)" % len(updated), "color: red", link_title])
-        else:
-            links.append(["manageextensions", "Extensions", None, None])
-
-        if profiler:
-            profiler.check("generateHeader (updated extensions)")
-
-    links.append(["config", "Config", None, None])
-    links.append(["tutorial", "Tutorial", None, None])
 
     if user.isAnonymous():
         count = 0
@@ -118,25 +91,49 @@ def generateHeader(target, db, user, generate_right=None, current_page=None, ext
         count = cursor.fetchone()[0]
 
     if count:
-        links.append(["news", "News (%d)" % count, "color: red", "There are %d unread news items!" % count])
+        navigation_bar.add_item("news", "News (%d)" % count, "There are %d unread news items!" % count)
     else:
-        links.append(["news", "News", None, None])
+        navigation_bar.add_item("news", "News")
 
     if profiler:
         profiler.check("generateHeader (news)")
 
     req = target.getRequest()
 
-    if configuration.base.AUTHENTICATION_MODE != "host" \
-           and configuration.base.SESSION_TYPE == "cookie":
-        if user.isAnonymous():
-            links.append(["javascript:void(location.href='/login?target='+encodeURIComponent(location.href));", "Sign in", None, None])
-        elif not req or req.user == user.name:
-            links.append(["javascript:signOut();", "Sign out", None, None])
-
     for url, label in extra_links:
-        links.append([url, label, None, None])
+        navigation_bar.add_item(url, label)
 
+    # User menu
+    if not user.isAnonymous():
+        #right_menu.li().a(href="home").text(user.fullname)
+
+        user_dropdown = navigation_bar.add_dropdown(user.fullname)
+
+        user_dropdown.add_item("home", "Profile")
+        user_dropdown.add_item("config", "Settings")
+
+        if configuration.extensions.ENABLED:
+            from extensions.extension import Extension
+
+            updated = Extension.getUpdatedExtensions(db, user)
+
+            if updated:
+                link_title = "\n".join([("%s by %s can be updated!" % (extension_name, author_fullname)) for author_fullname, extension_name in updated])
+                user_dropdown.add_item("manageextensions", "Extensions (%d)" % len(updated), link_title)
+            else:
+                user_dropdown.add_item("manageextensions", "Extensions")
+
+            if profiler:
+                profiler.check("generateHeader (updated extensions)")
+
+        if configuration.base.AUTHENTICATION_MODE != "host" and configuration.base.SESSION_TYPE == "cookie":
+            user_dropdown.add_separator()
+            user_dropdown.add_item("javascript:signOut();", "Sign out")
+
+    elif configuration.base.AUTHENTICATION_MODE != "host" and configuration.base.SESSION_TYPE == "cookie":
+        navigation_bar.add_item("javascript:void(location.href='/login?target='+encodeURIComponent(location.href));", "Sign in", BootstrapNavbar.Position.RIGHT)
+
+    # Inject extensions
     if req and configuration.extensions.ENABLED:
         import extensions.role.inject
 
@@ -152,21 +149,10 @@ def generateHeader(target, db, user, generate_right=None, current_page=None, ext
     else:
         injected = None
 
-    ul = left.ul()
-
-    for index, (url, label, style, title) in enumerate(links):
-        if not re.match("[-.a-z]+:|/", url):
-            url = "/" + url
-        ul.li().a(href=url, style=style, title=title).text(label)
-
-        rel = LINK_RELS.get(label)
-        if rel: target.setLink(rel, url)
-
-    right = row.td("right", valign='bottom', align='right')
     if generate_right:
-        generate_right(right)
+        generate_right(navigation_bar.left)
     else:
-        right.div("buttons").span("buttonscope buttonscope-global")
+        navigation_bar.left.div("buttons").span("buttonscope buttonscope-global")
 
     if profiler:
         profiler.check("generateHeader (finish)")
