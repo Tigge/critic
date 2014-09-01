@@ -18,6 +18,7 @@
 
 body {
     color: #222;
+    background: #ebe9e4;
 }
 
 h1.noscript {
@@ -201,14 +202,6 @@ table.paleyellow > tbody > tr.centered > td {
 
 table.paleyellow > tbody > tr.centered > td > button {
     margin-top: 1em
-}
-
-@media (min-width: 1348px) {
-    .section,
-    div.main > table,
-    table.paleyellow {
-        width: 1280px
-    }
 }
 
 .callout {
@@ -445,4 +438,35 @@ fieldset {
 }
 .checkbox-group label:last-child {
     padding-right: 0;
+}
+
+.navigation {
+    background: #fff;
+    box-shadow: 0 4px 2px -2px gray;
+}
+
+.navbar-default, .main {
+    width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.navbar-default {
+    background: none;
+    box-shadow: none;
+    border: none;
+    font-size: 18px;
+}
+
+.navbar-default .navbar-brand {
+    color: #db5440;
+    font-weight: bolder;
+    font-size: 24px;
+}
+
+.main {
+    background: #fff;
+    padding: 30px;
+    margin-top: 10px;
+    margin-bottom: 10px;
 }

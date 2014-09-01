@@ -82,7 +82,7 @@ def renderHome(req, db, user):
 
     target = body.div("main")
 
-    basic = target.table('paleyellow basic', align='center')
+    basic = target.table('table', align='center')
     basic.tr().td('h1', colspan=3).h1().text("%s Home" % title_fullname)
 
     def row(heading, value, help=None, extra_class=None):

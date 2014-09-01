@@ -304,7 +304,7 @@ class PaleYellowTable:
         if not target.hasTitle():
             target.setTitle(title)
 
-        self.table = target.div("main").table("paleyellow", align="center").tbody()
+        self.table = target.div("main").table("table", align="center").tbody()
         self.columns = columns
 
         colgroup = self.table.colgroup()
